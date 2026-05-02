@@ -75,7 +75,7 @@ def export_html(content: dict[str, Any], template: str = "creator-launch") -> st
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>{_esc(seo.get("title", brand))}</title>
+<title>{_esc(seo.get("title", content.get("brandName", "Landing Page")))}</title>
 <meta name="description" content="{_esc(seo.get("description", ""))}">
 <style>
 *{{margin:0;padding:0;box-sizing:border-box}}

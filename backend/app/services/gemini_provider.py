@@ -122,7 +122,7 @@ class GeminiProvider(BaseAIProvider):
             )
 
             logger.info("Calling Gemini model: %s", self.model_name)
-            response = model.generate_content(prompt)
+            response = await model.generate_content_async(prompt)
             raw_text = response.text
             logger.info("Gemini response received (%d chars)", len(raw_text))
 

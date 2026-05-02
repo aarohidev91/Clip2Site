@@ -19,7 +19,8 @@ export default function Login() {
       await authService.login(email, password);
       navigate('/dashboard');
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail || 'Login failed';
+      const detail = (err as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail;
+      const msg = Array.isArray(detail) ? detail.map((e: { msg?: string }) => e.msg).join(', ') : (typeof detail === 'string' ? detail : 'Login failed');
       setError(msg);
     }
     setLoading(false);

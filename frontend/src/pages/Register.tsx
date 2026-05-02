@@ -24,7 +24,8 @@ export default function Register() {
       await authService.register(name, email, password);
       navigate('/dashboard');
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail || 'Registration failed';
+      const detail = (err as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail;
+      const msg = Array.isArray(detail) ? detail.map((e: { msg?: string }) => e.msg).join(', ') : (typeof detail === 'string' ? detail : 'Registration failed');
       setError(msg);
     }
     setLoading(false);

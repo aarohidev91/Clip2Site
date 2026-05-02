@@ -54,7 +54,8 @@ export default function CreateProject() {
 
       navigate(`/projects/${project.id}`);
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail || 'Failed to create project';
+      const detail = (err as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail;
+      const msg = Array.isArray(detail) ? detail.map((e: { msg?: string }) => e.msg).join(', ') : (typeof detail === 'string' ? detail : 'Failed to create project');
       setError(msg);
       setLoading(false);
     }
