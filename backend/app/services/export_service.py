@@ -1,15 +1,25 @@
+import html
 import logging
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
+def _esc(value: str) -> str:
+    return html.escape(str(value), quote=True)
+
+
+def _jsx_escape(value: str) -> str:
+    escaped = str(value).replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
+    return '{"' + escaped + '"}'
+
+
 def export_html(content: dict[str, Any], template: str = "creator-launch") -> str:
-    brand = content.get("brandName", "Landing Page")
-    headline = content.get("headline", "")
-    subheadline = content.get("subheadline", "")
-    primary_cta = content.get("primaryCta", "Get Started")
-    secondary_cta = content.get("secondaryCta", "Learn More")
+    brand = _esc(content.get("brandName", "Landing Page"))
+    headline = _esc(content.get("headline", ""))
+    subheadline = _esc(content.get("subheadline", ""))
+    primary_cta = _esc(content.get("primaryCta", "Get Started"))
+    secondary_cta = _esc(content.get("secondaryCta", "Learn More"))
     problem = content.get("problem", {})
     solution = content.get("solution", {})
     benefits = content.get("benefits", [])
@@ -29,34 +39,34 @@ def export_html(content: dict[str, Any], template: str = "creator-launch") -> st
 
     benefits_html = "".join(
         f'<div style="background:{colors["card"]};padding:24px;border-radius:12px;flex:1;min-width:250px">'
-        f'<h3 style="color:{colors["primary"]};margin-bottom:8px">{b.get("title","")}</h3>'
-        f'<p style="color:{colors["text"]};opacity:0.8">{b.get("description","")}</p></div>'
+        f'<h3 style="color:{colors["primary"]};margin-bottom:8px">{_esc(b.get("title",""))}</h3>'
+        f'<p style="color:{colors["text"]};opacity:0.8">{_esc(b.get("description",""))}</p></div>'
         for b in benefits
     )
 
     features_html = "".join(
         f'<div style="background:{colors["card"]};padding:24px;border-radius:12px;flex:1;min-width:250px">'
-        f'<h3 style="color:{colors["secondary"]};margin-bottom:8px">{f.get("title","")}</h3>'
-        f'<p style="color:{colors["text"]};opacity:0.8">{f.get("description","")}</p></div>'
+        f'<h3 style="color:{colors["secondary"]};margin-bottom:8px">{_esc(f.get("title",""))}</h3>'
+        f'<p style="color:{colors["text"]};opacity:0.8">{_esc(f.get("description",""))}</p></div>'
         for f in features
     )
 
-    problem_points = "".join(f'<li style="margin-bottom:8px">{p}</li>' for p in problem.get("points", []))
+    problem_points = "".join(f'<li style="margin-bottom:8px">{_esc(p)}</li>' for p in problem.get("points", []))
 
     testimonials_html = "".join(
         f'<div style="background:{colors["card"]};padding:20px;border-radius:12px;margin-bottom:16px;'
-        f'border-left:4px solid {colors["primary"]}"><p style="color:{colors["text"]};font-style:italic">{t}</p></div>'
+        f'border-left:4px solid {colors["primary"]}"><p style="color:{colors["text"]};font-style:italic">{_esc(t)}</p></div>'
         for t in social_proof.get("items", [])
     )
 
     pricing_features = "".join(
-        f'<li style="margin-bottom:8px;color:{colors["text"]}">{pf}</li>' for pf in pricing.get("features", [])
+        f'<li style="margin-bottom:8px;color:{colors["text"]}">{_esc(pf)}</li>' for pf in pricing.get("features", [])
     )
 
     faqs_html = "".join(
         f'<div style="margin-bottom:20px;padding:20px;background:{colors["card"]};border-radius:8px">'
-        f'<h4 style="color:{colors["primary"]};margin-bottom:8px">{fq.get("question","")}</h4>'
-        f'<p style="color:{colors["text"]};opacity:0.8">{fq.get("answer","")}</p></div>'
+        f'<h4 style="color:{colors["primary"]};margin-bottom:8px">{_esc(fq.get("question",""))}</h4>'
+        f'<p style="color:{colors["text"]};opacity:0.8">{_esc(fq.get("answer",""))}</p></div>'
         for fq in faqs
     )
 
@@ -65,8 +75,8 @@ def export_html(content: dict[str, Any], template: str = "creator-launch") -> st
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>{seo.get("title", brand)}</title>
-<meta name="description" content="{seo.get("description", "")}">
+<title>{_esc(seo.get("title", brand))}</title>
+<meta name="description" content="{_esc(seo.get("description", ""))}">
 <style>
 *{{margin:0;padding:0;box-sizing:border-box}}
 body{{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:{colors["bg"]};color:{colors["text"]}}}
@@ -93,15 +103,15 @@ section{{padding:80px 0}}
 
 <section>
 <div class="container" style="text-align:center">
-<h2 style="font-size:36px;margin-bottom:16px">{problem.get("title","")}</h2>
+<h2 style="font-size:36px;margin-bottom:16px">{_esc(problem.get("title",""))}</h2>
 <ul style="list-style:none;max-width:700px;margin:0 auto;text-align:left;font-size:18px;opacity:0.8">{problem_points}</ul>
 </div>
 </section>
 
 <section>
 <div class="container" style="text-align:center">
-<h2 style="font-size:36px;margin-bottom:16px">{solution.get("title","")}</h2>
-<p style="font-size:18px;opacity:0.8;max-width:800px;margin:0 auto">{solution.get("description","")}</p>
+<h2 style="font-size:36px;margin-bottom:16px">{_esc(solution.get("title",""))}</h2>
+<p style="font-size:18px;opacity:0.8;max-width:800px;margin:0 auto">{_esc(solution.get("description",""))}</p>
 </div>
 </section>
 
@@ -121,17 +131,17 @@ section{{padding:80px 0}}
 
 <section>
 <div class="container">
-<h2 style="font-size:36px;margin-bottom:32px;text-align:center">{social_proof.get("title","")}</h2>
+<h2 style="font-size:36px;margin-bottom:32px;text-align:center">{_esc(social_proof.get("title",""))}</h2>
 <div style="max-width:700px;margin:0 auto">{testimonials_html}</div>
 </div>
 </section>
 
 <section>
 <div class="container" style="text-align:center">
-<h2 style="font-size:36px;margin-bottom:16px">{pricing.get("title","")}</h2>
-<p style="font-size:18px;opacity:0.8;margin-bottom:24px">{pricing.get("description","")}</p>
+<h2 style="font-size:36px;margin-bottom:16px">{_esc(pricing.get("title",""))}</h2>
+<p style="font-size:18px;opacity:0.8;margin-bottom:24px">{_esc(pricing.get("description",""))}</p>
 <div style="background:{colors["card"]};padding:40px;border-radius:16px;max-width:500px;margin:0 auto;border:2px solid {colors["primary"]}">
-<p style="font-size:32px;font-weight:bold;color:{colors["primary"]};margin-bottom:24px">{pricing.get("price","")}</p>
+<p style="font-size:32px;font-weight:bold;color:{colors["primary"]};margin-bottom:24px">{_esc(pricing.get("price",""))}</p>
 <ul style="list-style:none;text-align:left;margin-bottom:24px">{pricing_features}</ul>
 <a href="#" class="btn-primary">{primary_cta}</a>
 </div>
@@ -147,9 +157,9 @@ section{{padding:80px 0}}
 
 <section style="text-align:center;background:linear-gradient(135deg,{colors["primary"]}22,{colors["secondary"]}22);padding:80px 0;border-radius:24px;margin:0 20px">
 <div class="container">
-<h2 style="font-size:36px;margin-bottom:16px">{final_cta.get("title","")}</h2>
-<p style="font-size:18px;opacity:0.8;margin-bottom:32px">{final_cta.get("description","")}</p>
-<a href="#" class="btn-primary">{final_cta.get("button","Get Started")}</a>
+<h2 style="font-size:36px;margin-bottom:16px">{_esc(final_cta.get("title",""))}</h2>
+<p style="font-size:18px;opacity:0.8;margin-bottom:32px">{_esc(final_cta.get("description",""))}</p>
+<a href="#" class="btn-primary">{_esc(final_cta.get("button","Get Started"))}</a>
 </div>
 </section>
 
@@ -161,11 +171,11 @@ section{{padding:80px 0}}
 
 
 def export_react(content: dict[str, Any], template: str = "creator-launch") -> str:
-    brand = content.get("brandName", "Landing Page")
-    headline = content.get("headline", "")
-    subheadline = content.get("subheadline", "")
-    primary_cta = content.get("primaryCta", "Get Started")
-    secondary_cta = content.get("secondaryCta", "Learn More")
+    brand = _jsx_escape(content.get("brandName", "Landing Page"))
+    headline = _jsx_escape(content.get("headline", ""))
+    subheadline = _jsx_escape(content.get("subheadline", ""))
+    primary_cta = _jsx_escape(content.get("primaryCta", "Get Started"))
+    secondary_cta = _jsx_escape(content.get("secondaryCta", "Learn More"))
     problem = content.get("problem", {})
     solution = content.get("solution", {})
     benefits = content.get("benefits", [])
@@ -177,42 +187,42 @@ def export_react(content: dict[str, Any], template: str = "creator-launch") -> s
 
     benefits_jsx = "\n".join(
         f'        <div key={{"{i}"}} className="bg-slate-800 p-6 rounded-xl">\n'
-        f'          <h3 className="text-purple-400 font-semibold mb-2">{b.get("title","")}</h3>\n'
-        f'          <p className="text-slate-300">{b.get("description","")}</p>\n'
+        f'          <h3 className="text-purple-400 font-semibold mb-2">{_jsx_escape(b.get("title",""))}</h3>\n'
+        f'          <p className="text-slate-300">{_jsx_escape(b.get("description",""))}</p>\n'
         f"        </div>"
         for i, b in enumerate(benefits)
     )
 
     features_jsx = "\n".join(
         f'        <div key={{"{i}"}} className="bg-slate-800 p-6 rounded-xl">\n'
-        f'          <h3 className="text-cyan-400 font-semibold mb-2">{f.get("title","")}</h3>\n'
-        f'          <p className="text-slate-300">{f.get("description","")}</p>\n'
+        f'          <h3 className="text-cyan-400 font-semibold mb-2">{_jsx_escape(f.get("title",""))}</h3>\n'
+        f'          <p className="text-slate-300">{_jsx_escape(f.get("description",""))}</p>\n'
         f"        </div>"
         for i, f in enumerate(features)
     )
 
     problem_jsx = "\n".join(
-        f'          <li key={{"{i}"}} className="text-slate-300 mb-2">{p}</li>'
+        f'          <li key={{"{i}"}} className="text-slate-300 mb-2">{_jsx_escape(p)}</li>'
         for i, p in enumerate(problem.get("points", []))
     )
 
     testimonials_jsx = "\n".join(
         f'        <div key={{"{i}"}} className="bg-slate-800 p-5 rounded-xl border-l-4 border-purple-500 mb-4">\n'
-        f'          <p className="text-slate-300 italic">{t}</p>\n'
+        f'          <p className="text-slate-300 italic">{_jsx_escape(t)}</p>\n'
         f"        </div>"
         for i, t in enumerate(social_proof.get("items", []))
     )
 
     faqs_jsx = "\n".join(
         f'        <div key={{"{i}"}} className="bg-slate-800 p-5 rounded-lg mb-4">\n'
-        f'          <h4 className="text-purple-400 font-semibold mb-2">{fq.get("question","")}</h4>\n'
-        f'          <p className="text-slate-300">{fq.get("answer","")}</p>\n'
+        f'          <h4 className="text-purple-400 font-semibold mb-2">{_jsx_escape(fq.get("question",""))}</h4>\n'
+        f'          <p className="text-slate-300">{_jsx_escape(fq.get("answer",""))}</p>\n'
         f"        </div>"
         for i, fq in enumerate(faqs)
     )
 
     pricing_features_jsx = "\n".join(
-        f'            <li key={{"{i}"}} className="text-slate-300 mb-2">{pf}</li>'
+        f'            <li key={{"{i}"}} className="text-slate-300 mb-2">{_jsx_escape(pf)}</li>'
         for i, pf in enumerate(pricing.get("features", []))
     )
 
@@ -230,14 +240,16 @@ export default function LandingPage() {{
       <section className="text-center py-24 px-6">
         <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">{headline}</h1>
         <p className="text-xl text-slate-300 max-w-2xl mx-auto mb-10">{subheadline}</p>
-        <button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-4 rounded-lg text-lg font-semibold mr-4">{primary_cta}</button>
-        <button className="border-2 border-purple-500 text-purple-400 px-8 py-4 rounded-lg text-lg">{secondary_cta}</button>
+        <div className="flex justify-center gap-4 flex-wrap">
+          <a href="#" className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-4 rounded-lg font-semibold text-lg">{primary_cta}</a>
+          <a href="#" className="border-2 border-purple-500 text-purple-400 px-8 py-4 rounded-lg font-semibold text-lg">{secondary_cta}</a>
+        </div>
       </section>
 
       {{/* Problem */}}
       <section className="py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-6">{problem.get("title","")}</h2>
+          <h2 className="text-3xl font-bold mb-8">{_jsx_escape(problem.get("title",""))}</h2>
           <ul className="text-left max-w-2xl mx-auto text-lg">
 {problem_jsx}
           </ul>
@@ -247,30 +259,30 @@ export default function LandingPage() {{
       {{/* Solution */}}
       <section className="py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-6">{solution.get("title","")}</h2>
-          <p className="text-lg text-slate-300">{solution.get("description","")}</p>
+          <h2 className="text-3xl font-bold mb-4">{_jsx_escape(solution.get("title",""))}</h2>
+          <p className="text-lg text-slate-300">{_jsx_escape(solution.get("description",""))}</p>
         </div>
       </section>
 
       {{/* Benefits */}}
       <section className="py-20 px-6">
-        <h2 className="text-3xl font-bold text-center mb-10">Why Choose Us</h2>
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <h2 className="text-3xl font-bold text-center mb-12">Why Choose Us</h2>
+        <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-6">
 {benefits_jsx}
         </div>
       </section>
 
       {{/* Features */}}
       <section className="py-20 px-6">
-        <h2 className="text-3xl font-bold text-center mb-10">Features</h2>
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <h2 className="text-3xl font-bold text-center mb-12">Features</h2>
+        <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-6">
 {features_jsx}
         </div>
       </section>
 
-      {{/* Social Proof */}}
+      {{/* Testimonials */}}
       <section className="py-20 px-6">
-        <h2 className="text-3xl font-bold text-center mb-10">{social_proof.get("title","")}</h2>
+        <h2 className="text-3xl font-bold text-center mb-12">{_jsx_escape(social_proof.get("title",""))}</h2>
         <div className="max-w-3xl mx-auto">
 {testimonials_jsx}
         </div>
@@ -278,30 +290,30 @@ export default function LandingPage() {{
 
       {{/* Pricing */}}
       <section className="py-20 px-6 text-center">
-        <h2 className="text-3xl font-bold mb-4">{pricing.get("title","")}</h2>
-        <p className="text-lg text-slate-300 mb-8">{pricing.get("description","")}</p>
+        <h2 className="text-3xl font-bold mb-4">{_jsx_escape(pricing.get("title",""))}</h2>
+        <p className="text-lg text-slate-300 mb-8">{_jsx_escape(pricing.get("description",""))}</p>
         <div className="bg-slate-800 p-10 rounded-2xl max-w-md mx-auto border-2 border-purple-500">
-          <p className="text-3xl font-bold text-purple-400 mb-6">{pricing.get("price","")}</p>
-          <ul className="text-left mb-6">
+          <p className="text-4xl font-bold text-purple-400 mb-6">{_jsx_escape(pricing.get("price",""))}</p>
+          <ul className="text-left mb-8">
 {pricing_features_jsx}
           </ul>
-          <button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-4 rounded-lg text-lg font-semibold w-full">{primary_cta}</button>
+          <a href="#" className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-4 rounded-lg font-semibold">{primary_cta}</a>
         </div>
       </section>
 
       {{/* FAQs */}}
       <section className="py-20 px-6">
-        <h2 className="text-3xl font-bold text-center mb-10">Frequently Asked Questions</h2>
+        <h2 className="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
         <div className="max-w-3xl mx-auto">
 {faqs_jsx}
         </div>
       </section>
 
       {{/* Final CTA */}}
-      <section className="py-20 px-6 text-center bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-3xl mx-6 mb-10">
-        <h2 className="text-3xl font-bold mb-4">{final_cta.get("title","")}</h2>
-        <p className="text-lg text-slate-300 mb-8">{final_cta.get("description","")}</p>
-        <button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-4 rounded-lg text-lg font-semibold">{final_cta.get("button","Get Started")}</button>
+      <section className="py-20 px-6 text-center bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-3xl mx-4">
+        <h2 className="text-3xl font-bold mb-4">{_jsx_escape(final_cta.get("title",""))}</h2>
+        <p className="text-lg text-slate-300 mb-8">{_jsx_escape(final_cta.get("description",""))}</p>
+        <a href="#" className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-4 rounded-lg font-semibold text-lg">{_jsx_escape(final_cta.get("button","Get Started"))}</a>
       </section>
 
       {{/* Footer */}}
